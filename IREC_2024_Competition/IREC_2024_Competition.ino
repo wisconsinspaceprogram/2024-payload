@@ -23,7 +23,7 @@ float sd2DeactivationTime = 0;
 bool launched = false;    
 float launchTime = -1;       //Time for keeping the launch sequence on for set time
 int cycleState = 0;         //Cycles through the different
-#define cycleTime 4     //# of seconds to stay on each cycle state
+#define cycleTime 5     //# of seconds to stay on each cycle state
 float lastCycleUpdate = 0;   //# of seconds since last cycle change
 #define launchDuration 300 //# of seconds to stay in the launched mode
 int ranCnt = 0;
@@ -52,19 +52,28 @@ bool coilVoltageDetected = false;
 
 
 //Cycle Sequences
-int preLaunchCycleSize = 18;
-bool preLaunchCycle[18][6] = {
+
+int preLaunchCycleSize = 25;
+bool preLaunchCycle[26][6] = {
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {1, 1, 1, 1, 1, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 1, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
   {1, 0, 1, 1, 1, 1},
   {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 0, 0},
   {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 1, 0, 0},
   {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -73,6 +82,16 @@ bool preLaunchCycle[18][6] = {
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0}
 };
+
+//{1, 0, 0, 0, 0, 0}, -> 3.04A
+//{1, 1, 0, 0, 0, 0}, -> 1.08A
+//{1, 0, 1, 0, 0, 0}, -> 1.92A, 6.82V
+//{1, 0, 0, 1, 0, 0}, -> 2.93A, 11.95V
+//{1, 0, 0, 0, 1, 0}, -> 2.9A
+//{1, 0, 1, 1, 0, 0}, -> 1.47A, 5.06V
+//{1, 0, 1, 1, 1, 1}, -> 1.2A, 4.08V
+//{1, 1, 1, 1, 1, 1}, -> 0.77A, 2.55V
+
 
 int launchCycleSize = 14;
 bool launchCycle[14][6] = {
@@ -99,7 +118,8 @@ void setup() {
   Serial.begin(9600);
 
   //Starting SD Cards
-  pinMode(SD1CSPIN, OUTPUT);
+  pinMode(53, OUTPUT);
+  //pinMode(SD1CSPIN, OUTPUT);
   
   if(SD.begin(SD1CSPIN)){
     Serial.println("SD 1 Good");
@@ -204,7 +224,7 @@ void loop() {
   digitalWrite(launchLED, launched ? HIGH : LOW);
   digitalWrite(sdLED, (sd1Active && sd2Active) ? HIGH : LOW); 
   digitalWrite(coilLED, coilVoltageDetected ? HIGH : LOW);
-  digitalWrite(photoDiodeLED, (newPhotoDiodeValue > 0 && newPhotoDiodeValue < 350) ? HIGH : LOW);
+  digitalWrite(photoDiodeLED, (newPhotoDiodeValue > 150 && newPhotoDiodeValue < 400) ? HIGH : LOW);
   digitalWrite(imuLED, (acc.x() != 0.0 || acc.y() != 0.0 || acc.z() != 0.0) ? HIGH : LOW);
   digitalWrite(ranLED, ranCnt > 0);
 
@@ -213,7 +233,9 @@ void loop() {
     coilVoltageDetected = true;
   }
 
-  Serial.println(newPhotoDiodeValue);
+  Serial.print(newPhotoDiodeValue);
+  Serial.print(",");
+  Serial.println(coilVoltage);
   //Serial.println(acc.z());
 
   //Logging data
