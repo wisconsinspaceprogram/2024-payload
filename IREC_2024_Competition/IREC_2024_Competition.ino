@@ -53,8 +53,8 @@ bool coilVoltageDetected = false;
 
 //Cycle Sequences
 
-int preLaunchCycleSize = 25;
-bool preLaunchCycle[26][6] = {
+int preLaunchCycleSize = 80;
+bool preLaunchCycle[80][6] = {
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -74,6 +74,60 @@ bool preLaunchCycle[26][6] = {
   {1, 0, 0, 1, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {1, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -233,9 +287,9 @@ void loop() {
     coilVoltageDetected = true;
   }
 
-  Serial.print(newPhotoDiodeValue);
-  Serial.print(",");
-  Serial.println(coilVoltage);
+  Serial.println(newPhotoDiodeValue);
+  //Serial.print(",");
+  //Serial.println(coilVoltage);
   //Serial.println(acc.z());
 
   //Logging data
@@ -276,11 +330,14 @@ void loop() {
 
   if(sd2Active || (time - sd2DeactivationTime > 15)){
     bool began = SD.begin(SD2CSPIN);
+    //Serial.println("Start 2");
     if(began){
+      //Serial.println("Started!");
       sd2Active = writeToSD(filename2, dataOut);
       if(!sd2Active){
         sd2Active = false;
         sd2DeactivationTime = time;
+        Serial.println("Didn't write :(!");
       }
     } else {
       sd2Active = false;
