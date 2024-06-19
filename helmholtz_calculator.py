@@ -40,7 +40,7 @@ fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 # ================== Plots field along axis for out setup ========================#
 show_all = False      #Plot every individual coil
 wire_width = 0.000812   #Diameter of wire, [m]
-min_dist = 0.002       #Inner distance between closest coils [m]
+min_dist = 0.006       #Inner distance between closest coils [m]
 width_cnt = 17        #number of coils stacked side by side
 height_cnt = 15       #number of coils stacked on top of one another
 inner_radius = 0.008  #radius of inner coil

@@ -3,6 +3,7 @@
 
 void setup() {
     pinMode(53, OUTPUT);
+    pinMode(13, OUTPUT);
     Serial.begin(256000);
     if (!SD.begin(53)) {
         Serial.println("Initialization failed!");
@@ -34,6 +35,7 @@ void loop() {
 }
 
 void dump(char filename[], int pin){
+  digitalWrite(13, HIGH);
   SD.begin(pin);
   File dataFile = SD.open(filename, FILE_READ);
     if (dataFile) {
@@ -44,4 +46,5 @@ void dump(char filename[], int pin){
     } else {
         Serial.println("Error opening ");
     }
+  digitalWrite(13, LOW);
 }

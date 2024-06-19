@@ -25,12 +25,12 @@ float launchTime = -1;       //Time for keeping the launch sequence on for set t
 int cycleState = 0;         //Cycles through the different
 #define cycleTime 5     //# of seconds to stay on each cycle state
 float lastCycleUpdate = 0;   //# of seconds since last cycle change
-#define launchDuration 300 //# of seconds to stay in the launched mode
+#define launchDuration 450 //# of seconds to stay in the launched mode
 int ranCnt = 0;
 
 //Code frequency in Hz
 #define PRE_LAUNCH_FREQUENCY 10 
-#define LAUNCH_FREQUENCY 50
+#define LAUNCH_FREQUENCY 100
 
 
 //Other pins
@@ -53,34 +53,104 @@ bool coilVoltageDetected = false;
 
 //Cycle Sequences
 
-int preLaunchCycleSize = 80;
-bool preLaunchCycle[80][6] = {
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
+int preLaunchCycleSize = 149;
+bool preLaunchCycle[149][6] = { 
   {0, 0, 0, 0, 0, 0},
   {1, 1, 1, 1, 1, 1},
   {0, 0, 0, 0, 0, 0},
-  {1, 1, 0, 0, 0, 0},
+  {1, 1, 0, 0, 0, 1},
   {0, 0, 0, 0, 0, 0},
-  {1, 0, 1, 1, 1, 1},
+  {1, 0, 1, 1, 1, 0},
   {0, 0, 0, 0, 0, 0},
   {1, 0, 1, 1, 0, 0},
   {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 0, 0, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 1, 1, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 1, 0, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 0, 1},
+
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+
+  {1, 0, 0, 0, 1, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 1, 1, 0},
+  {0, 0, 0, 0, 0, 0},
   {1, 0, 1, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
-  {1, 0, 0, 1, 0, 0},
+  {1, 0, 1, 0, 1, 0},
   {0, 0, 0, 0, 0, 0},
-  {1, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 0, 1},
   {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 1, 1},
   {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
+  {1, 1, 0, 1, 1, 1},
+
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -93,6 +163,7 @@ bool preLaunchCycle[80][6] = {
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
+
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -105,6 +176,7 @@ bool preLaunchCycle[80][6] = {
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
+
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -117,12 +189,20 @@ bool preLaunchCycle[80][6] = {
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
+
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -137,32 +217,45 @@ bool preLaunchCycle[80][6] = {
   {0, 0, 0, 0, 0, 0}
 };
 
-//{1, 0, 0, 0, 0, 0}, -> 3.04A
-//{1, 1, 0, 0, 0, 0}, -> 1.08A
-//{1, 0, 1, 0, 0, 0}, -> 1.92A, 6.82V
-//{1, 0, 0, 1, 0, 0}, -> 2.93A, 11.95V
-//{1, 0, 0, 0, 1, 0}, -> 2.9A
-//{1, 0, 1, 1, 0, 0}, -> 1.47A, 5.06V
-//{1, 0, 1, 1, 1, 1}, -> 1.2A, 4.08V
-//{1, 1, 1, 1, 1, 1}, -> 0.77A, 2.55V
 
-
-int launchCycleSize = 14;
-bool launchCycle[14][6] = {
-  {0, 0, 0, 0, 0, 0},
+int launchCycleSize = 34;
+bool launchCycle[34][6] = { 
   {0, 0, 0, 0, 0, 0},
   {1, 1, 1, 1, 1, 1},
-  {1, 0, 1, 1, 1, 1},
   {0, 0, 0, 0, 0, 0},
+  {1, 1, 0, 0, 0, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 1, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 0, 0, 1},
   {0, 0, 0, 0, 0, 0},
   {1, 0, 0, 1, 1, 1},
-  {1, 0, 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 1, 0, 1},
   {0, 0, 0, 0, 0, 0},
   {1, 0, 0, 0, 0, 1},
+
   {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0}, 
-  {1, 0, 0, 0, 0, 0}
+  {0, 0, 0, 0, 0, 0},
+
+  {1, 0, 0, 0, 1, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 1, 1, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 0, 1, 0},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 0, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 1, 1, 1},
+  {0, 0, 0, 0, 0, 0},
+  {1, 1, 0, 1, 1, 1},
+
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0}
 };
 
 int cyclePins[6] = {2, 3, 4, 5, 6, 7};
@@ -178,6 +271,10 @@ void setup() {
   if(SD.begin(SD1CSPIN)){
     Serial.println("SD 1 Good");
     sd1Active = true;
+
+    File myFile = SD.open(filename1, FILE_WRITE); 
+    myFile.write("Time,State,MagX,MagY,MagZ,AccX,AccY,AccZ,LaunchTime,PD,Launched,RanCount,Temp,SD1,SD2,MainBat,CoilBat,Coil,,");
+
   } else {
     Serial.println("SD 1 Bad");
     sd1Active = false;
@@ -186,6 +283,10 @@ void setup() {
   if(SD.begin(SD2CSPIN)){
     Serial.println("SD 2 Good");
     sd2Active = true;
+
+    File myFile = SD.open(filename2, FILE_WRITE); 
+    myFile.write("Time,State,MagX,MagY,MagZ,AccX,AccY,AccZ,LaunchTime,PD,Launched,RanCount,Temp,SD1,SD2,MainBat,CoilBat,Coil,,");
+
   } else {
     Serial.println("SD 2 Bad");
     sd2Active = false;
@@ -210,9 +311,6 @@ void setup() {
   pinMode(photoDiodeLED, OUTPUT);  
   pinMode(imuLED, OUTPUT);
   pinMode(ranLED, OUTPUT);
-
-  //Write headers to SD card
-  //TODO
 
 }
 
@@ -279,7 +377,7 @@ void loop() {
   digitalWrite(sdLED, (sd1Active && sd2Active) ? HIGH : LOW); 
   digitalWrite(coilLED, coilVoltageDetected ? HIGH : LOW);
   digitalWrite(photoDiodeLED, (newPhotoDiodeValue > 150 && newPhotoDiodeValue < 400) ? HIGH : LOW);
-  digitalWrite(imuLED, (acc.x() != 0.0 || acc.y() != 0.0 || acc.z() != 0.0) ? HIGH : LOW);
+  digitalWrite(imuLED, ((abs(acc.x()) > 0.5) || (abs(acc.y()) > 0.5) || (abs(acc.z()) > 0.5)) ? HIGH : LOW);
   digitalWrite(ranLED, ranCnt > 0);
 
   //Setting this to true if we see some voltage over coil
@@ -287,7 +385,7 @@ void loop() {
     coilVoltageDetected = true;
   }
 
-  Serial.println(newPhotoDiodeValue);
+  //Serial.println(acc.z());
   //Serial.print(",");
   //Serial.println(coilVoltage);
   //Serial.println(acc.z());
@@ -310,7 +408,7 @@ void loop() {
   dataOut[14] = sd2Active ? 1 : 0;
   dataOut[15] = mainBatVoltage;
   dataOut[16] = coilBatVoltage;
-  dataOut[17] = coilVoltage;
+  dataOut[17] = currentCombo[0] ? coilVoltage : 0;
 
   
   //Writing to SD
