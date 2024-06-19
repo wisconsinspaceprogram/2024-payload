@@ -273,7 +273,8 @@ void setup() {
     sd1Active = true;
 
     File myFile = SD.open(filename1, FILE_WRITE); 
-    myFile.write("Time,State,MagX,MagY,MagZ,AccX,AccY,AccZ,LaunchTime,PD,Launched,RanCount,Temp,SD1,SD2,MainBat,CoilBat,Coil,,");
+    myFile.println("Time,State,MagX,MagY,MagZ,AccX,AccY,AccZ,LaunchTime,PD,Launched,RanCount,Temp,SD1,SD2,MainBat,CoilBat,Coil,,");
+    myFile.close();
 
   } else {
     Serial.println("SD 1 Bad");
@@ -285,7 +286,8 @@ void setup() {
     sd2Active = true;
 
     File myFile = SD.open(filename2, FILE_WRITE); 
-    myFile.write("Time,State,MagX,MagY,MagZ,AccX,AccY,AccZ,LaunchTime,PD,Launched,RanCount,Temp,SD1,SD2,MainBat,CoilBat,Coil,,");
+    myFile.println("Time,State,MagX,MagY,MagZ,AccX,AccY,AccZ,LaunchTime,PD,Launched,RanCount,Temp,SD1,SD2,MainBat,CoilBat,Coil,,");
+    myFile.close();
 
   } else {
     Serial.println("SD 2 Bad");
@@ -335,7 +337,7 @@ void loop() {
 
   //Launch management
   // Launch detected
-  if((abs(acc.x()) > 20 || abs(acc.y()) > 20 || abs(acc.z()) > 20) && !launched){
+  if((abs(acc.x()) > 30 || abs(acc.y()) > 30 || abs(acc.z()) > 30) && !launched){
     launched = true;
     launchTime = time;
     cycleState = 0;
