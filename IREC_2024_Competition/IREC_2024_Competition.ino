@@ -25,7 +25,7 @@ float launchTime = -1;       //Time for keeping the launch sequence on for set t
 int cycleState = 0;         //Cycles through the different
 #define cycleTime 5     //# of seconds to stay on each cycle state
 float lastCycleUpdate = 0;   //# of seconds since last cycle change
-#define launchDuration 450 //# of seconds to stay in the launched mode
+#define launchDuration 300 //# of seconds to stay in the launched mode
 int ranCnt = 0;
 
 //Code frequency in Hz
@@ -332,11 +332,6 @@ void loop() {
   //Reading photo diode value
   float newPhotoDiodeValue = analogRead(photoDiodePin);
 
-  //Reading voltage dividers
-  float mainBatVoltage = (analogRead(mainBatPin)/1023.0) * 15.625;
-  float coilBatVoltage = (analogRead(coilBatPin)/1023.0) * 15.625;
-  float coilVoltage = (analogRead(coilPin)/1023.0) * 15.625;
-
 
   //Launch management
   // Launch detected
@@ -380,12 +375,17 @@ void loop() {
   digitalWrite(imuLED, ((abs(acc.x()) > 0.5) || (abs(acc.y()) > 0.5) || (abs(acc.z()) > 0.5)) ? HIGH : LOW);
   digitalWrite(ranLED, ranCnt > 0);
 
+  //Reading voltage dividers
+  float mainBatVoltage = (analogRead(mainBatPin)/1023.0) * 15.217;
+  float coilBatVoltage = (analogRead(coilBatPin)/1023.0) * 15.2306;
+  float coilVoltage = (analogRead(coilPin)/1023.0) * 15.395;
+
   //Setting this to true if we see some voltage over coil
   if(coilVoltage > 0.25){
     coilVoltageDetected = true;
   }
 
-  //Serial.println(acc.z());
+  //Serial.println(acc.z());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
   //Serial.print(",");
   //Serial.println(coilVoltage);
   //Serial.println(acc.z());

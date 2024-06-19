@@ -5,6 +5,8 @@ import pygame_chart as pyc
 from Plotter import Plotter
 import matplotlib.pyplot as plt
 import time
+import scipy
+import csv
 
 def Buttonify(Picture, coords, size, surface):
     image = pygame.image.load(Picture)
@@ -13,6 +15,12 @@ def Buttonify(Picture, coords, size, surface):
     imagerect.topleft = coords
     surface.blit(image,imagerect)
     return (image,imagerect)
+
+def rsquared(x, y):
+    """ Return R^2 where x and y are array-like."""
+
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+    return r_value**2
 
 # Screen and window settings
 background = (255, 255, 255)
@@ -50,8 +58,8 @@ df = pd.read_csv(file_path)
 
 print(df['Time'])
 
-#preLaunch = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-#launch = [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0]
+preLaunch = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+launch = [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0]
 
 _time = []
 pdVal = []
@@ -73,7 +81,7 @@ lastPd = 0
 for index, row in df.iterrows():
   if row["State"] != lastState:
     if(pdSum > 0):
-      if row["Launched"] == 1 or True:
+      if (row["Launched"] == 1 or True) and voltSum > 0:
         pdVal.append(pdSum / pdCount)
         current.append((voltSum / voltCount) / 3.4)
         _time.append(startTime)
@@ -113,9 +121,16 @@ plt.plot(field, yfit, color='red')
 plt.xlabel("Field [Gauss]")
 plt.ylabel("Optical Change [%]")
 plt.suptitle("Ground Test Run Results")
-plt.title("Limited Test Levels")
+plt.title("R-Squared: " + str(rsquared(field, pdChange)))
 plt.savefig("TestDataImage.png")
 
+filename = 'output.csv'
+
+# Writing to the CSV file
+with open(filename, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    for name, age in zip(field, pdChange):
+        writer.writerow([name, age])
 
 
 ####
