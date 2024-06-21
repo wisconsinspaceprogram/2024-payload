@@ -330,10 +330,6 @@ void loop() {
   //imu::Vector<3> gyr = bno055.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);  //Don't need, but here if needed
   imu::Vector<3> mag = bno055.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER) / 100; // in Gauss
 
-  //Other readings
-  //Reading photo diode value
-  float newPhotoDiodeValue = analogRead(photoDiodePin);
-
 
   //Launch management
   // Launch detected
@@ -368,6 +364,11 @@ void loop() {
   digitalWrite(cyclePins[3], currentCombo[3] ? HIGH : LOW);
   digitalWrite(cyclePins[4], currentCombo[4] ? HIGH : LOW);
   digitalWrite(cyclePins[5], currentCombo[5] ? HIGH : LOW);
+
+
+  //Other readings
+  //Reading photo diode value
+  float newPhotoDiodeValue = analogRead(photoDiodePin);
 
   //Updating LEDs
   digitalWrite(launchLED, launched ? HIGH : LOW);

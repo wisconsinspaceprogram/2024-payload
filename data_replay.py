@@ -7,6 +7,17 @@ import matplotlib.pyplot as plt
 import time
 import scipy
 import csv
+from datetime import datetime, timedelta
+
+def time_from_seconds(seconds):
+    # Starting time 6:29:29 AM
+    start_time = datetime.strptime("06:29:29 AM", "%I:%M:%S %p")
+    
+    # Calculate the new time by adding the seconds
+    new_time = start_time + timedelta(seconds=seconds)
+    
+    # Format the new time as a string with AM/PM
+    return new_time.strftime("%I:%M:%S %p")
 
 def Buttonify(Picture, coords, size, surface):
     image = pygame.image.load(Picture)
@@ -25,19 +36,21 @@ def rsquared(x, y):
 # Screen and window settings
 background = (255, 255, 255)
 pygame.init()
-pygame.display.set_caption("2024 Payload Data Replay")
+pygame.display.set_caption("2024 UW-Madison Payload Data Replay")
 screen = pygame.display.set_mode((1920,1000))
 screen.fill(background)
 
 #Reading the data in
 #file_path = 'Payload/Github Repo/2024-payload/Utility Scripts/Extractor/Logs/2024-06-14_22_52_52_593467_1.csv'
 #file_path = 'Payload/Github Repo/2024-payload/Utility Scripts/Extractor/Logs/2024-06-17_00_35_51_353186_1.csv'
-file_path = 'Payload/Github Repo/2024-payload/Utility Scripts/Extractor/Logs/2024-06-18_22_31_22_342847_1.csv'
+
+file_path = 'Payload/Github Repo/2024-payload/Utility Scripts/Extractor/Logs/2024-06-19_15_20_09_926906_1.csv'
+#file_path = 'Payload/Github Repo/2024-payload/Utility Scripts/Extractor/Logs/CompFlightLaunchOnly.csv'
 
 ###
 
 def best_fit(X, Y):
-
+  if len(X) > 0 and len(Y) > 0:
     xbar = sum(X)/len(X)
     ybar = sum(Y)/len(Y)
     n = len(X) # or len(Y)
@@ -51,6 +64,7 @@ def best_fit(X, Y):
     print('best fit line:\ny = {:.5f} + {:.5f}x'.format(a, b))
 
     return a, b
+  return 0, 0
 
 #file_path = 'Payload/Github Repo/2024-payload/Utility Scripts/Extractor/Logs/2024-06-14_22_52_52_593467_1.csv'
 
@@ -61,81 +75,98 @@ print(df['Time'])
 preLaunch = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 launch = [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0]
 
-_time = []
-pdVal = []
-pdChange = []
-current = []
+#Tracking for our "Replay"
+lastLoopTime = 0
+index = 0
+startTime = 31633.53#22078.27
+refillBuffers = True
+lookback = 31633.87 #Seconds
+clickedScrubber = False
 
-pdCount = 0
-pdSum = 0
+def update_scatter():
+  _time = []
+  pdVal = []
+  pdChange = []
+  current = []
+  _temp = []
+  cols = []
 
-voltCount = 0
-voltSum = 0
+  pdCount = 0
+  pdSum = 0
 
-lastState = 0
+  voltCount = 0
+  voltSum = 0
 
-startTime = 0
+  lastState = 0
 
-lastPd = 0
+  t = 0
 
-for index, row in df.iterrows():
-  if row["State"] != lastState:
-    if(pdSum > 0):
-      if (row["Launched"] == 1 or True) and voltSum > 0:
-        pdVal.append(pdSum / pdCount)
-        current.append((voltSum / voltCount) / 3.4)
-        _time.append(startTime)
-        pdChange.append(((pdSum / pdCount - lastPd) / lastPd * 100) if voltSum > 0 else 0)
+  lastPd = 0
 
-    lastPd = pdSum / pdCount
+  for index, row in df.iterrows():
+    if row["State"] != lastState:
+      if(pdSum > 0):
+        if t >= (startTime - lookback) and t <= startTime:
+          if (row["Launched"] == 1 or True) and voltSum > 0:
+            pdVal.append(pdSum / pdCount)
+            current.append((voltSum / voltCount) / 3.4)
+            _time.append(startTime)
+            pdChange.append(((pdSum / pdCount - lastPd) / lastPd * 100) if voltSum > 0 else 0)
+            cols.append(((row["Temp"] - 20) / 40, 0,(1 - (row["Temp"] - 20) / 40)))
+      lastPd = pdSum / max(pdCount, 1)
 
-    pdSum = 0
-    pdCount = 0
+      pdSum = 0
+      pdCount = 0
 
-    voltSum = 0
-    voltCount = 0
+      voltSum = 0
+      voltCount = 0
 
-    startTime = row["Time"]
+      t = row["Time"]
 
 
-  #if((preLaunch[int(row["State"])] if (row["Launched"] == 0) else launch[int(row["State"])]) > 0):
-  voltSum += row["Coil"]
+    #if((preLaunch[int(row["State"])] if (row["Launched"] == 0) else launch[int(row["State"])]) > 0):
+    voltSum += row["Coil"]
 
-  pdSum += row["PD"]
-  voltCount += 1
-  pdCount += 1
+    pdSum += row["PD"]
+    voltCount += 1
+    pdCount += 1
 
-  lastState = row["State"]
+    lastState = row["State"]
 
-field = []
+  field = []
 
-for cur in current:
-  field.append(cur * 132.55)
+  for cur in current:
+    field.append(cur * 132.55)
 
-a, b = best_fit(field, pdChange)
+  a, b = best_fit(field, pdChange)
 
-#plt.plot(pdChange)
-plt.scatter(field, pdChange)
-yfit = [a + b * xi for xi in field]
-plt.plot(field, yfit, color='red')
-plt.xlabel("Field [Gauss]")
-plt.ylabel("Optical Change [%]")
-plt.suptitle("Ground Test Run Results")
-plt.title("R-Squared: " + str(rsquared(field, pdChange)))
-plt.savefig("TestDataImage.png")
+  #plt.plot(pdChange)
+  plt.clf()
+  plt.scatter(field, pdChange, color="blue")#, color=cols)
+  yfit = [a + b * xi for xi in field]
+  plt.plot(field, yfit, color='red', label=str(round(a, 5)) + " + " + str(round(b, 5)) + "x")
+  plt.xlabel("Field [Gauss]")
+  plt.ylabel("Optical Change [%]")
+  plt.suptitle("Optical Response to Varying Magnetic Field")
+  plt.title("R-Squared: " + str(round(rsquared(field, pdChange), 3)))
+  plt.legend(loc="upper right")
+  plt.savefig("TestDataImage.png")
 
-filename = 'output.csv'
+  Buttonify("TestDataImage.png", (1200, 200), (640, 480), screen)
 
-# Writing to the CSV file
-with open(filename, mode='w', newline='') as file:
-    writer = csv.writer(file)
-    for name, age in zip(field, pdChange):
-        writer.writerow([name, age])
+  return a, b
+
+# filename = 'output.csv'
+
+# # Writing to the CSV file
+# with open(filename, mode='w', newline='') as file:
+#     writer = csv.writer(file)
+#     for name, age in zip(field, pdChange):
+#         writer.writerow([name, age])
 
 
 ####
-
-
+a, b = update_scatter()
 
 
 df = pd.read_csv(file_path)
@@ -155,14 +186,6 @@ sd2List = list(df["SD2"])
 tempList = list(df["Temp"])
 
 
-#Tracking for our "Replay"
-lastLoopTime = 0
-index = 0
-startTime = 2000
-refillBuffers = True
-lookback = 200 #Seconds
-clickedScrubber = False
-
 #Buffers for plots :)
 timeBuffer = []
 pdBuffer = []
@@ -170,16 +193,17 @@ accXBuffer = []
 accYBuffer = []
 accZBuffer = []
 fieldBuffer = []
-
+tempBuffer = []
 
 #Plotters
 
-accXPlotter = Plotter(screen, "Acceleration X [m/s]", "", 50, 50, 400, 200, 1, (255, 0, 255), 5)
-accYPlotter = Plotter(screen, "Acceleration Y [m/s]", "", 50, 275, 400, 200, 1, (0, 150, 0), 5)
-accZPlotter = Plotter(screen, "Acceleration Z [m/s]", "", 50, 500, 400, 200, 1, (0, 0, 200), 5)
+accXPlotter = Plotter(screen, "Acceleration X [m/s^2]", "Time After Activation [s]", "", 50, 25, 400, 250, 1, (255, 0, 255), 5, True)
+accYPlotter = Plotter(screen, "Acceleration Y [m/s^2]", "Time After Activation [s]", "", 50, 275, 400, 250, 1, (0, 150, 0), 5, True)
+accZPlotter = Plotter(screen, "Acceleration Z [m/s^2]", "Time After Activation [s]", "", 50, 525, 400, 250, 1, (0, 0, 200), 5, True)
 
-pdPlotter = Plotter(screen, "Photo Diode", "", 550, 50, 600, 300, 6, (255, 0, 0), 5)
-fieldPlotter = Plotter(screen, "Field Strength [Gauss]", "", 550, 400, 600, 300, 20, (0, 150, 255), 1)
+pdPlotter = Plotter(screen, "Photo Diode Output", "Time After Activation [s]", "", 550, 25, 600, 250, 6, (255, 0, 0), 5, False)
+fieldPlotter = Plotter(screen, "Field Strength [Gauss]", "Time After Activation [s]", "", 550, 275, 600, 250, 20, (0, 150, 255), 1, False)
+tempPlotter = Plotter(screen, "Internal Temperature [C]", "Time After Activation [s]", "",550, 525, 600, 250, 20, (255,159,0), 1, False)
 
 #Other window setup
 mediumBlackFont = pygame.font.SysFont("Ariel", 24)
@@ -187,9 +211,6 @@ largeBlackFont = pygame.font.SysFont("Ariel", 36)
 
 #Buttonify("Payload/Github Repo/2024-payload/Images/BatteryOutline.png", (420, 350), (50, 100), screen)
 #Buttonify("Payload/Github Repo/2024-payload/Images/BatteryOutline.png", (520, 350), (50, 100), screen)
-
-Buttonify("TestDataImage.png", (1200, 122), (640, 480), screen)
-Buttonify("BadgerBallisticslogo_B.png", (1400, 700), (400, 400), screen)
 
 sliderPos = 800
 
@@ -201,11 +222,16 @@ for i in range(len(launchedList)):
   if i > 0:
     if launchedList[i] == 1 and launchedList[i-1] == 0:
       curLaunch[0] = timeList[i]
-    if (launchedList[i] == 0 and launchedList[i-1] == 1) or i == len(launchedList) - 1:
+    if (launchedList[i] == 0 and launchedList[i-1] == 1) or (i == len(launchedList) - 1 and curLaunch[1] != 0):
       curLaunch[1] = timeList[i-1]
       launchTimes.append(curLaunch)
       curLaunch = [0, 0]
 print(launchTimes)
+
+
+pause = False
+
+
 while True:
 
   events = pygame.event.get()
@@ -219,18 +245,18 @@ while True:
 
     if event.type == pygame.MOUSEBUTTONDOWN:
       if mousey > sliderPos - 20 and mousey < sliderPos + 20:
-        startTime = ((mousex - 100) / 1720) * max(timeList)
+        startTime = ((mousex - 100) / 1720) * (max(timeList) - min(timeList)) + min(timeList)
         clickedScrubber = True
 
     if event.type == pygame.MOUSEBUTTONUP:
       if clickedScrubber:
         refillBuffers = True
 
-        if (((mousex - 100) / 1720) * max(timeList)) >= startTime:
-          lookback = max(((mousex - 100) / 1720) * max(timeList) - startTime, 1)
-          startTime = ((mousex - 100) / 1720) * max(timeList)
+        if (((mousex - 100) / 1720) * (max(timeList) - min(timeList)) + min(timeList)) >= startTime:
+          lookback = max(((mousex - 100) / 1720) * (max(timeList) - min(timeList)) + min(timeList) - startTime, 1)
+          startTime = ((mousex - 100) / 1720) * (max(timeList) - min(timeList)) + min(timeList)
         else:
-          lookback = startTime - ((mousex - 100) / 1720) * max(timeList)
+          lookback = startTime - ((mousex - 100) / 1720) * (max(timeList) - min(timeList))+ min(timeList)
 
         timeBuffer = []
         pdBuffer = []
@@ -238,18 +264,24 @@ while True:
         accYBuffer = []
         accZBuffer = []
         fieldBuffer = []
+        tempBuffer = []
 
         clickedScrubber = False
 
         index = 0
 
+        pause = False
+
+      a, b = update_scatter()
+
   #Stop once we hit end of data
-  if index < len(timeList):
+  if index < len(timeList) and not pause:
 
     #Waiting if we are running too quick
-    #if index > 0:
-    #  if ((time.time() - lastLoopTime)) < (timeList[index] - timeList[index - 1]):
-    #    time.sleep((timeList[index] - timeList[index - 1] - (time.time() - lastLoopTime)))
+    if index > 0:
+      if ((time.time() - lastLoopTime)) < (timeList[index] - timeList[index - 1]):
+        time.sleep((timeList[index] - timeList[index - 1] - (time.time() - lastLoopTime)))
+      pause = True
 
     #Calculations
     field = coilList[index] / 3.85 * 132
@@ -262,6 +294,7 @@ while True:
       accYBuffer.append(accYList[index])
       accZBuffer.append(accZList[index])
       fieldBuffer.append(field)# if field < 345 else 0)
+      tempBuffer.append(tempList[index])
 
 
     #If we change the starttime, we need to refresh the buffers
@@ -278,6 +311,7 @@ while True:
           accYBuffer.append(accYList[index])
           accZBuffer.append(accZList[index])
           fieldBuffer.append(field)# if field < 345 else 0)
+          tempBuffer.append(tempList[index])
 
         index += 1
 
@@ -289,6 +323,7 @@ while True:
       accYBuffer.pop(0)
       accZBuffer.pop(0)
       fieldBuffer.pop(0)
+      tempBuffer.pop(0)
 
     #Updating graphs and data
     pdPlotter.set_data(timeBuffer, pdBuffer)
@@ -296,6 +331,7 @@ while True:
     accYPlotter.set_data(timeBuffer, accYBuffer)
     accZPlotter.set_data(timeBuffer, accZBuffer)
     fieldPlotter.set_data(timeBuffer, fieldBuffer)
+    tempPlotter.set_data(timeBuffer, tempBuffer)
 
 
 
@@ -304,15 +340,16 @@ while True:
     accYPlotter.update()
     accZPlotter.update()
     fieldPlotter.update()
+    tempPlotter.update()
 
-
+    offset = 375
 
     #Updating battery info ever once in a while
-    if index % 4 == 0:
-      pygame.draw.rect(screen, background, pygame.Rect(650, 800, 600, 100))
+    if index % 1 == 0:
+      pygame.draw.rect(screen, background, pygame.Rect(650, 800, 1200, 300))
 
       text_surface = largeBlackFont.render("Main:" + str(mainBatList[index]) + "V", False, (0, 0, 0), background)
-      screen.blit(text_surface, (650, 885))
+      screen.blit(text_surface, (650 + offset, 885))
 
       batteryColor = (0, 200, 0)
       if(mainBatList[index] < 12.5):
@@ -320,12 +357,12 @@ while True:
       elif(mainBatList[index] < 12):
         batteryColor = (200, 0, 0)
 
-      pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(845, 880, 130, 40))
-      pygame.draw.rect(screen, batteryColor, pygame.Rect(850, 885, min((mainBatList[index] - 11) / 2 * 120, 120), 30))
+      pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(845 + offset, 880, 130, 40))
+      pygame.draw.rect(screen, batteryColor, pygame.Rect(850 + offset, 885, min((mainBatList[index] - 11) / 2 * 120, 120), 30))
 
 
       text_surface = largeBlackFont.render("Coil: " + str(coilBatList[index]) + "V", False, (0, 0, 0), background)
-      screen.blit(text_surface, (650, 935))
+      screen.blit(text_surface, (650 + offset, 935))
 
       batteryColor = (0, 200, 0)
       if(coilBatList[index] < 12.5):
@@ -333,37 +370,41 @@ while True:
       elif(coilBatList[index] < 12):
         batteryColor = (200, 0, 0)
 
-      pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(845, 930, 130, 40))
-      pygame.draw.rect(screen, batteryColor, pygame.Rect(850, 935, min((coilBatList[index] - 11) / 2 * 120, 120), 30))
+      pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(845 + offset, 930, 130, 40))
+      pygame.draw.rect(screen, batteryColor, pygame.Rect(850 + offset, 935, min((coilBatList[index] - 11) / 2 * 120, 120), 30))
 
 
-    text_surface = largeBlackFont.render("Launch State: " + ("Flight" if launchedList[index] == 1 else "Idle"), False, (0, 0, 0), background)
-    screen.blit(text_surface, (650, 835))
+    text_surface = largeBlackFont.render("Launch State: " + ("Flight" if (launchedList[index] == 1 or launchedList[max(index-1, 1)] == 1) else "Idle"), False, (0, 0, 0), background)
+    screen.blit(text_surface, (650 + offset, 835))
 
     text_surface = largeBlackFont.render("SD #1: " + ("Connected" if sd1List[index] == 1 else "Disconnected"), False, (0, 0, 0), background)
-    screen.blit(text_surface, (250, 835))
+    screen.blit(text_surface, (250 + offset, 835))
 
     text_surface = largeBlackFont.render("SD #2: " + ("Connected" if sd2List[index] == 1 else "Disconnected"), False, (0, 0, 0), background)
-    screen.blit(text_surface, (250, 885))
+    screen.blit(text_surface, (250 + offset, 885))
 
     text_surface = largeBlackFont.render("IMU: " + ("Connected" if (abs(accXList[index]) > 0.5 or abs(accYList[index]) > 0.5 or abs(accZList[index]) > 0.5) else "Disconnected"), False, (0, 0, 0), background)
-    screen.blit(text_surface, (250, 935))
+    screen.blit(text_surface, (250 + offset, 935))
 
-    text_surface = largeBlackFont.render("Temperature: " + str(tempList[index]) + "C", False, (0, 0, 0), background)
-    screen.blit(text_surface, (1100, 835))
+    pygame.draw.rect(screen, background, pygame.Rect(1200, 50, 1000, 100))
+    text_surface = largeBlackFont.render("Time range: " + time_from_seconds(startTime-lookback) + " - " + time_from_seconds(startTime), False, (0, 0, 0), background)
+    screen.blit(text_surface, (1300, 100))
 
     #Drawing visible window on scrubber
     scrubberRect = pygame.Rect(100, sliderPos-5, 1720, 10)
     pygame.draw.rect(screen, (100, 100, 100), scrubberRect)
     
+    print(launchTimes)
     #Drawing launch times
     if len(launchTimes) > 0:
       for j in range(len(launchTimes)):
-        launchRect = pygame.Rect(launchTimes[j][0] / max(timeList) * 1720 + 100, sliderPos-5, max((launchTimes[j][1] - launchTimes[j][0]) / max(timeList) * 1720, 2), 10)
+        launchRect = pygame.Rect(launchTimes[j][0] / (max(timeList) - min(timeList)) * 1720 + 100, sliderPos-5, max((launchTimes[j][1] - launchTimes[j][0]) / (max(timeList) - min(timeList)) * 1720, 2), 10)
         pygame.draw.rect(screen, (0, 200, 0), launchRect)
 
-    visibleRect = pygame.Rect(max(timeList[index] - lookback, 0) / max(timeList) * 1720 + 100, sliderPos-3, lookback / max(timeList) * 1720, 6)
+    visibleRect = pygame.Rect(max(timeList[index] - lookback, 0) / (max(timeList) - min(timeList)) * 1720 + 100, sliderPos-3, lookback / (max(timeList) - min(timeList)) * 1720, 6)
     pygame.draw.rect(screen, (250, 100, 100), visibleRect)
+
+    Buttonify("BadgerBallisticslogo_B.png", (1400, 700), (400, 400), screen)
 
     #Mainting the loop and time tracking feature
     lastLoopTime = time.time()

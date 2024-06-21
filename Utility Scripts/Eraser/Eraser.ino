@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-const int chipSelect = 53;
+const int chipSelect = 49;
 
 void setup() {
   // Open serial communications and wait for port to open:
